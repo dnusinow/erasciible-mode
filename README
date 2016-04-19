@@ -1,0 +1,16 @@
+eRASCIIble Minor Mode For Emacs
+
+This minor mode is meant to pair with both ESS and Adoc modes for
+handling R and ASCIIdoc files respectively. Using the outstanding
+knitr R package, these two file types can be associated in a literate
+programming style. Traditionally, you would write a single file with
+blocks of alternating code and text. While emacs can support this with
+one of several modes, I personally find it more comfortable right now
+to keep the two separate while things are developing.
+
+This mode assumes that for any given analysis you have both a .R and
+.Rasciidoc file with the same prefix name. These two will eventually
+be knit together by knitr. This mode provides functions for creating
+both of these files at once, inserting and jumping between knitr
+blocks, including between the paired files, and adding missing blocks
+from the R file to the Rasciidoc one.
