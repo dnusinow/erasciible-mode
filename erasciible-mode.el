@@ -94,7 +94,7 @@ computed on and moved around if they are missing"
 (defun erasciible-copy-current-knitr-block-name ()
   "Copy the current knitr block name to the kill ring"
   (interactive)
-  (let ((block (get-current-knitr-block-name)))
+  (let ((block (erasciible-get-current-knitr-block-name)))
 	(kill-new block)))
 
 (defun erasciible-get-paired-knitr-buffer ()
