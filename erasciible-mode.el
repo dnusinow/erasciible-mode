@@ -108,7 +108,7 @@ R buffer it'll be an Rasciidoc and vice-versa"
 
 (defun erasciible-insert-current-block-into-asciidoc ()
   (interactive)
-  (let ((asciibuf (erasciible-get-paired_knitr-buffer))
+  (let ((asciibuf (erasciible-get-paired-knitr-buffer))
 		(block (erasciible-get-current-knitr-block-name)))
 	(save-excursion
 	  (set-buffer asciibuf)
