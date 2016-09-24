@@ -1,3 +1,40 @@
+(defun erasciible-get-block-pos ()
+  "Selects the whole of a block including preceding
+comments. TODO: Take named block defaulting to the current one"
+  (save-excursion
+	(let ((rx (erasciible-get-knitr-block-rx))
+		  (start (point)))
+	  (message rx)
+	  (if (not (re-search-backward rx 0 t))
+		  (error "Couldn't match a block")
+		(let ((beg (match-beginning 0)))
+		  (goto-char start)
+		  (let ((end (if (not (re-search-forward rx (buffer-size) t))
+						 (buffer-size)
+					   (match-beginning 0))))
+			(cons beg end)))))))
+
+(defun erasciible-kill-block ()
+  "Kills the current block"
+  (interactive)
+  (let ((pos (erasciible-get-block-pos)))
+	(kill-region (car pos) (cdr pos))))
+
+(defun erasciible-move-block-to-archive ()
+  "Take the whole current knitr block and move it to an archived
+file. Only works for the R script portion"
+  (interactive)						; TODO: Take block name as arg and offer completions
+  (if (not (string-match "\\.R$" (buffer-name)))
+	  (message "Can't move a block from anything but an R script")
+	  (let* ((archive-buf-name (concat "archive/archived_" (buffer-name)))
+			 (archive-buf (find-file archive-buf-name)))
+		(progn
+		  (erasciible-kill-block)
+		  (save-excursion
+			(goto-char (point-max))
+			(insert "\n")
+			(yank))))))
+
 (defun erasciible-new-analysis (analysis-name)
   "Create a new analysis setup in the current directory. This
 will create buffers for both the Rasciidoc and R files necessary,
@@ -19,9 +56,9 @@ and open the buffers in the background"
   "Get a regex for a knitr block name depending on the type of
 file the current buffer is"
   (cond ((string-match "\\.Rasciidoc$" (buffer-name))
-		 "//begin.rcode\s+\\([[:alnum:]-_]+\\)")
+		 "//begin.rcode\s-+\\([[:alnum:]-_]+\\)")
 		((string-match "\\.R$" (buffer-name))
-		 "@knitr\s+\\([[:graph:]]+\\)")))
+		 "^#[[:space:]#]+@knitr[[:space:]]+\\([[:graph:]]+\\)[[:space:]]*$")))
 
 (defun erasciible-get-knitr-blocks ()
   "Get a list of knitr blocks in the .R or Rasciidoc file. Returned as a list
@@ -220,7 +257,7 @@ knitr"
 		   ;; TODO: Add support for block arguments
 		   ((string= arg "")
 			(let ((nwords (length (split-string (company-grab-line "^//.*")))))
-			  (cond ((eq nwords 1)
+ 			  (cond ((eq nwords 1)
 				     (erasciible-get-missing-knitr-blocks))
 					((> nwords 1)
 					 (erasciible-get-knitr-block-args))
@@ -240,7 +277,8 @@ knitr"
 					  (erasciible-get-knitr-block-args)))
 					((< nwords 1)
 					 (list)))))
-			))))
+		   ))))
+
 
 ;;;###autoload
 (define-minor-mode erasciible-mode
