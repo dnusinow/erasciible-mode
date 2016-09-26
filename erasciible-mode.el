@@ -293,6 +293,15 @@ reproducible document generation."
 			(define-key map (kbd "C-c C-x i") 'erasciible-insert-current-block-into-asciidoc)
 			(define-key map (kbd "C-c b") 'erasciible-insert-knitr-block)
 			map)
+  (font-lock-add-keywords
+   nil
+   '(("#.*[[:space:]]+\\(@knitr\\)" 1 'font-lock-warning-face prepend)
+	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)" 2 'font-lock-function-name-face prepend)))
+  (if (fboundp 'font-lock-flush)
+	  (font-lock-flush)
+	(when font-lock-mode
+	  (with-no-warnings
+		(font-lock-fontify-buffer))))
   (add-to-list 'company-backends 'erasciible-company-rasciidoc-backend))
 
 ;;;###autoload
