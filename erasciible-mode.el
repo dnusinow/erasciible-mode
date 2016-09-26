@@ -26,14 +26,14 @@ file. Only works for the R script portion"
   (interactive)						; TODO: Take block name as arg and offer completions
   (if (not (string-match "\\.R$" (buffer-name)))
 	  (message "Can't move a block from anything but an R script")
+	(progn
+	  (erasciible-kill-block)
 	  (let* ((archive-buf-name (concat "archive/archived_" (buffer-name)))
 			 (archive-buf (find-file archive-buf-name)))
-		(progn
-		  (erasciible-kill-block)
-		  (save-excursion
-			(goto-char (point-max))
-			(insert "\n")
-			(yank))))))
+		(save-excursion
+		  (goto-char (point-max))
+		  (insert "\n")
+		  (yank))))))
 
 (defun erasciible-new-analysis (analysis-name)
   "Create a new analysis setup in the current directory. This
