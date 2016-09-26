@@ -165,8 +165,8 @@ R buffer it'll be an Rasciidoc and vice-versa"
 	(cond ((string-match "R$" (buffer-file-name))
 		   (list "@knitr"
 				 "^#+"
-				 "####\n#### @knitr"
-				 "####"))
+				 "#### @knitr"
+				 ""))
 		  ((string-match "[rR]asciidoc$" (buffer-file-name))
 		   (list "//begin.rcode"
 				 "//end.rcode"
