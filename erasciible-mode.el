@@ -279,6 +279,17 @@ knitr"
 					 (list)))))
 		   ))))
 
+(defface erasciible-block-keyword-face
+  '((default . (:inherit font-lock-warning-face :weight extra-bold
+						 :height (lambda (x) (round (* x 1.5))))))
+  "Font Lock face used to highlight block keywords (like @knitr) in erasciible ess buffers."
+  :group 'erasciible)
+
+(defface erasciible-block-id-face
+  '((default . (:inherit font-lock-variable-name-face :weight extra-bold
+						 :height (lambda (x) (round (* x 1.5))))))
+  "Font Lock face used to highlight block id names in ess erasciible buffers."
+  :group 'erasciible)
 
 ;;;###autoload
 (define-minor-mode erasciible-mode
@@ -295,8 +306,8 @@ reproducible document generation."
 			map)
   (font-lock-add-keywords
    nil
-   '(("#.*[[:space:]]+\\(@knitr\\)" 1 'font-lock-warning-face prepend)
-	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)" 2 'font-lock-function-name-face prepend)))
+   '(("#.*[[:space:]]+\\(@knitr\\)" 1 'erasciible-block-keyword-face prepend)
+	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)" 2 'erasciible-block-id-face prepend)))
   (if (fboundp 'font-lock-flush)
 	  (font-lock-flush)
 	(when font-lock-mode
