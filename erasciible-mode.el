@@ -307,21 +307,27 @@ COMMAND, ARG, and IGNORED see function `company-mode'."
   "Font Lock face used to highlight block id names in ess erasciible buffers."
   :group 'erasciible)
 
+(defvar erasciible-mode-map
+  (let ((map (make-sparse-keymap)))
+	 (define-key map (kbd "C-c g") 'erasciible-goto-knitr-block)
+	 (define-key map (kbd "C-c C-n") 'erasciible-new-analysis)
+	 (define-key map (kbd "C-x p") 'erasciible-goto-paired-knitr-block)
+	 (define-key map (kbd "C-c u") 'erasciible-copy-current-knitr-block-name)
+	 (define-key map (kbd "C-c C-x i") 'erasciible-insert-current-block-into-asciidoc)
+	 (define-key map (kbd "C-c b") 'erasciible-insert-knitr-block)
+	 map)
+  "Keymap used by `erasciible-mode'.")
+
 ;;; Define the Mode
 
 ;;;###autoload
 (define-minor-mode erasciible-mode
   "Work with paired Rasciidoc and R documents for knitr-driven
-reproducible document generation."
+reproducible document generation.
+
+\\{erasciible-mode-map}"
   :lighter " eRASCIIble"
-  :keymap (let ((map (make-sparse-keymap)))
-			(define-key map (kbd "C-c g") 'erasciible-goto-knitr-block)
-			(define-key map (kbd "C-c C-n") 'erasciible-new-analysis)
-			(define-key map (kbd "C-x p") 'erasciible-goto-paired-knitr-block)
-			(define-key map (kbd "C-c u") 'erasciible-copy-current-knitr-block-name)
-			(define-key map (kbd "C-c C-x i") 'erasciible-insert-current-block-into-asciidoc)
-			(define-key map (kbd "C-c b") 'erasciible-insert-knitr-block)
-			map)
+  :keymap erasciible-mode-map
   (font-lock-add-keywords
    nil
    '(("#.*[[:space:]]+\\(@knitr\\)" 1 'erasciible-block-keyword-face prepend)
