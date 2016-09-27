@@ -16,7 +16,7 @@ comments. TODO: Take named block defaulting to the current one"
 
 (defun erasciible-kill-block ()
   "Kills the current block"
-  (interactive)
+  (interactive) 
   (let ((pos (erasciible-get-block-pos)))
 	(kill-region (car pos) (cdr pos))))
 
@@ -220,7 +220,7 @@ R buffer it'll be an Rasciidoc and vice-versa"
 		"R.options")
   )
 
-(defun erasciible-grab-symbol ()
+(defun erasciible--grab-symbol ()
   "If point is at the end of a symbol, return it.
 Otherwise, if point is not inside a symbol, return an empty
 string. This version is modified from company's to allow the
