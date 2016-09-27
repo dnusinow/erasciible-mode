@@ -308,7 +308,7 @@ COMMAND, ARG, and IGNORED see function `company-mode'."
   :group 'erasciible)
 
 (defvar erasciible-mode-map
-  (let ((map (make-sparse-keymap)))
+  (let ((map (make-sparse-keymap "eRASCIIble")))
 	 (define-key map (kbd "C-c g") 'erasciible-goto-knitr-block)
 	 (define-key map (kbd "C-c C-n") 'erasciible-new-analysis)
 	 (define-key map (kbd "C-x p") 'erasciible-goto-paired-knitr-block)
