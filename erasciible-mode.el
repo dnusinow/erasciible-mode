@@ -306,8 +306,14 @@ reproducible document generation."
 			map)
   (font-lock-add-keywords
    nil
-   '(("#.*[[:space:]]+\\(@knitr\\)" 1 'erasciible-block-keyword-face prepend)
-	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)" 2 'erasciible-block-id-face prepend)))
+   '(("#.*[[:space:]]+\\(@knitr\\)"
+	  1
+	  'erasciible-block-keyword-face
+	  prepend)
+	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)"
+	  2
+	  'erasciible-block-id-face
+	  prepend)))
   (if (fboundp 'font-lock-flush)
 	  (font-lock-flush)
 	(when font-lock-mode
