@@ -9,8 +9,8 @@
 (defun erasciible-new-analysis (analysis-name)
   "Create a new analysis ANALYSIS-NAME in the current directory.
 This will create buffers for both the Rasciidoc and R files necessary,
-and open the buffers in the background
-  (interactive \"Manalysis name: \")"
+and open the buffers in the background"
+  (interactive "Manalysis name: ")
   (let* ((analysis-safe-name (replace-regexp-in-string "\s+" "_" analysis-name))
 		 (rbuf (find-file-noselect (concat "./" analysis-safe-name ".R")))
 		 (rasciibuf (find-file-noselect (concat "./" analysis-safe-name ".Rasciidoc"))))
