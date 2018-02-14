@@ -44,11 +44,20 @@ and open the buffers in the background"
 (defun erasciible-insert-current-block-into-asciidoc ()
   "Insert a reference to the current block in to the asciidoc file at the point in that buffer."
   (interactive)
-  (let ((asciibuf (erasciible-get-paired-knitr-buffer))
-		(block (erasciible-get-current-knitr-block-name)))
-	(save-excursion
-	  (set-buffer asciibuf)
-	  (erasciible-insert-knitr-block block))))
+  (cond ((string-match "\\.Rasciidoc$" (buffer-name))
+		 (let ((asciibuf (buffer-name))
+			   (rbuf (erasciible-get-paired-knitr-buffer)))
+		   (save-excursion
+			 (set-buffer rbuf)
+			 (let ((block (erasciible-get-current-knitr-block-name)))
+			   (set-buffer asciibuf)
+			   (erasciible-insert-knitr-block block)))))
+		((string-match "\\.R$" (buffer-name))
+		 (let ((asciibuf (erasciible-get-paired-knitr-buffer))
+			   (block (erasciible-get-current-knitr-block-name)))
+		   (save-excursion
+			 (set-buffer asciibuf)
+			 (erasciible-insert-knitr-block block))))))
 
 (defun erasciible-copy-current-knitr-block-name ()
   "Copy the current knitr block name to the kill ring."
@@ -330,8 +339,14 @@ reproducible document generation.
   :keymap erasciible-mode-map
   (font-lock-add-keywords
    nil
-   '(("#.*[[:space:]]+\\(@knitr\\)" 1 'erasciible-block-keyword-face prepend)
-	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)" 2 'erasciible-block-id-face prepend)))
+   '(("#.*[[:space:]]+\\(@knitr\\)"
+	  1
+	  'erasciible-block-keyword-face
+	  prepend)
+	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)"
+	  2
+	  'erasciible-block-id-face
+	  prepend)))
   (if (fboundp 'font-lock-flush)
 	  (font-lock-flush)
 	(when font-lock-mode
