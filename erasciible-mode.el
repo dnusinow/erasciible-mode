@@ -48,20 +48,10 @@ and open the buffers in the background"
 (defun erasciible-insert-current-block-into-asciidoc ()
   "Insert a reference to the current block in to the asciidoc file at the point in that buffer."
   (interactive)
-  (cond ((string-match "\\.Rasciidoc$" (buffer-name))
-	 (let ((asciibuf (buffer-name))
-	       (rbuf (erasciible-get-paired-knitr-buffer)))
-	   (save-excursion
-	     (set-buffer rbuf)
-	     (let ((block (erasciible-get-current-knitr-block-name)))
-	       (set-buffer asciibuf)
-	       (erasciible-insert-knitr-block block)))))
-	((string-match "\\.R$" (buffer-name))
-	 (let ((asciibuf (erasciible-get-paired-knitr-buffer))
-	       (block (erasciible-get-current-knitr-block-name)))
-	   (save-excursion
-	     (set-buffer asciibuf)
-	     (erasciible-insert-knitr-block block))))))
+  (with-current-buffer (erasciible-r-buffer)
+    (let ((block (erasciible-get-current-knitr-block-name)))
+      (with-current-buffer (erasciible-rasciidoc-buffer)
+        (erasciible-insert-knitr-block block)))))
 
 (defun erasciible-copy-current-knitr-block-name ()
   "Copy the current knitr block name to the kill ring."
@@ -132,12 +122,6 @@ Only works for the R script portion"
 	  (goto-char (point-max))
 	  (insert "\n")
 	  (yank))))))
-
-;; (defun erasciible-report-out-of-order-blocks ()
-;;   "Report which blocks don't match up their order between R and Rasciidoc files."
-;;   (interactive)
-;;   (with-current-buffer (erasciible-get-paired-knitr-buffer)
-;;     (erasciible-insert-knitr-block (erasciible-get-current-knitr-block-name))))
 
 (defun erasciible-out-of-order-blocks-table ()
   "Report which blocks don't match up their order between R and Rasciidoc files.
