@@ -135,8 +135,8 @@ in the Rasciidoc that matches the first R file block."
          (all-blocks (-distinct (append rblocks ablocks)))
          (block-info (-map (lambda (block)
                              (list block
-                               (--find-index (string= block it) rblocks)
-                               (--find-index (string= block it) ablocks)))
+                                   (--find-index (string= block it) rblocks)
+                                   (--find-index (string= block it) ablocks)))
                            all-blocks))
          (ooo-blocks (--remove (equal (nth 1 it) (nth 2 it)) block-info)))
     (if ooo-blocks
@@ -172,9 +172,9 @@ in the Rasciidoc that matches the first R file block."
 (defun erasciible-get-current-knitr-block-name ()
   "Get the current knitr block name."
   (save-excursion
-	(save-match-data
-	  (if (re-search-backward (erasciible-get-knitr-block-rx))
-		  (match-string 1)))))
+    (save-match-data
+      (if (re-search-backward (erasciible-get-knitr-block-rx))
+	  (match-string 1)))))
 
 (defun erasciible-get-knitr-block-rx ()
   "Get a regex for a knitr block name.
@@ -194,88 +194,88 @@ The first item in the list is a regex to match the beginning of a
   specification.  Both the second and fourth items, relating to
   the end of the block specification, may be nil."
   (save-match-data
-	(cond ((string-match "R$" (buffer-file-name))
-		   (list "@knitr"
-				 "^#+"
-				 "#### @knitr"
-				 ""))
-		  ((string-match "[rR]asciidoc$" (buffer-file-name))
-		   (list "//begin.rcode"
-				 "//end.rcode"
-				 "//begin.rcode"
-				 "//end.rcode")))))
+    (cond ((string-match "R$" (buffer-file-name))
+	   (list "@knitr"
+		 "^#+"
+		 "#### @knitr"
+		 ""))
+	  ((string-match "[rR]asciidoc$" (buffer-file-name))
+	   (list "//begin.rcode"
+		 "//end.rcode"
+		 "//begin.rcode"
+		 "//end.rcode")))))
 
 (defun erasciible-get-knitr-blocks ()
   "Get a list of knitr blocks in the .R or Rasciidoc file.
 Returned as a list of two element lists.  The first element is the
   name of the block, the second is the position in the file"
   (save-excursion
-	(save-match-data
-          (goto-char (point-min))
-	  (let ((blocks ()))
-		(while (re-search-forward (erasciible-get-knitr-block-rx) nil t)
-		  (let ((matched (match-string 1)))
-			(set-text-properties 0 (string-width matched) nil matched)
-			(push (list matched (point)) blocks)))
-		(nreverse blocks)))))
+    (save-match-data
+      (goto-char (point-min))
+      (let ((blocks ()))
+	(while (re-search-forward (erasciible-get-knitr-block-rx) nil t)
+	  (let ((matched (match-string 1)))
+	    (set-text-properties 0 (string-width matched) nil matched)
+	    (push (list matched (point)) blocks)))
+	(nreverse blocks)))))
 
 (defun erasciible-get-missing-knitr-blocks ()
   "Return a list of block names in the paired knitr file that aren't present in the current buffer."
   (let* ((paired-buf (erasciible-get-paired-knitr-buffer))
-		 (these-blocks (mapcar 'car (erasciible-get-knitr-blocks)))
-		 (paired-blocks
-		  (save-excursion
-			(set-buffer paired-buf)
-			(mapcar 'car (erasciible-get-knitr-blocks)))))
-	(nreverse (cl-set-difference paired-blocks these-blocks :test 'string=))))
+	 (these-blocks (mapcar 'car (erasciible-get-knitr-blocks)))
+	 (paired-blocks
+	  (save-excursion
+	    (set-buffer paired-buf)
+	    (mapcar 'car (erasciible-get-knitr-blocks)))))
+    (nreverse (cl-set-difference paired-blocks these-blocks :test 'string=))))
 
 (defun erasciible-get-block-pos ()
   "Select the whole of a block including preceding comments.
 TODO: Take named block defaulting to the current one."
   (save-excursion
-	(let ((rx (erasciible-get-knitr-block-rx))
-		  (start (point)))
-	  (message rx)
-	  (if (not (re-search-backward rx 0 t))
-		  (error "Couldn't match a block")
-		(let ((beg (match-beginning 0)))
-		  (goto-char start)
-		  (let ((end (if (not (re-search-forward rx (buffer-size) t))
-						 (buffer-size)
-					   (match-beginning 0))))
-			(cons beg end)))))))
+    (let ((rx (erasciible-get-knitr-block-rx))
+	  (start (point)))
+      (message rx)
+      (if (not (re-search-backward rx 0 t))
+	  (error "Couldn't match a block")
+	(let ((beg (match-beginning 0)))
+	  (goto-char start)
+	  (let ((end (if (not (re-search-forward rx (buffer-size) t))
+			 (buffer-size)
+		       (match-beginning 0))))
+	    (cons beg end)))))))
 
 (defun erasciible-get-paired-knitr-buffer ()
   "Gets the matching knitr buffer for the current one.
 If it's an R buffer it'll be an Rasciidoc and vice-versa."
   (save-match-data
-	(if (string-match "\\([[:print:]]+\\)\\.R$" (buffer-name))
-		(get-buffer (concat (buffer-name) "asciidoc"))
-	  (if (string-match "\\([[:print:]]+\\)\\.Rasciidoc$" (buffer-name))
-		  (get-buffer (concat (match-string 1 (buffer-name)) ".R"))))))
+    (if (string-match "\\([[:print:]]+\\)\\.R$" (buffer-name))
+	(get-buffer (concat (buffer-name) "asciidoc"))
+      (if (string-match "\\([[:print:]]+\\)\\.Rasciidoc$" (buffer-name))
+	  (get-buffer (concat (match-string 1 (buffer-name)) ".R"))))))
 
 ;;; Completion Functions
 
 (defun erasciible-get-knitr-block-args
-	()
+    ()
   "Arguments to knitr for block evaluation."
   (list "eval" "echo" "results" "collapse" "warning" "error"
-		"message" "split" "include" "strip.white"
-		"tidy" "prompt" "comment" "highlight"
-		"size" "background"
-		"cache" "cache.path" "cache.vars" "cache.lazy"
-		"cache.comments" "cache.rebuild" "dependson"
-		"autodep" "fig.path" "fig.keep" "fig.show"
-		"dev" "dev.args" "fig.ext" "dpi" "fig.width" "fig.height"
-		"fig.asp" "out.width" "out.height" "out.extra"
-		"fig.retina" "resize.width" "resize.height"
-		"fig.align" "fig.env" "fig.cap" "fig.scap"
-		"fig.lp" "fig.pos" "fig.subcap" "fig.process"
-		"fig.showtext" "external" "sanitize"
-		"interval" "aniopts" "ffmpeg.bitrate"
-		"ffmpeg.format" "code" "ref.label"
-		"child" "engine" "opts.label" "purl"
-		"R.options")
+	"message" "split" "include" "strip.white"
+	"tidy" "prompt" "comment" "highlight"
+	"size" "background"
+	"cache" "cache.path" "cache.vars" "cache.lazy"
+	"cache.comments" "cache.rebuild" "dependson"
+	"autodep" "fig.path" "fig.keep" "fig.show"
+	"dev" "dev.args" "fig.ext" "dpi" "fig.width" "fig.height"
+	"fig.asp" "out.width" "out.height" "out.extra"
+	"fig.retina" "resize.width" "resize.height"
+	"fig.align" "fig.env" "fig.cap" "fig.scap"
+	"fig.lp" "fig.pos" "fig.subcap" "fig.process"
+	"fig.showtext" "external" "sanitize"
+	"interval" "aniopts" "ffmpeg.bitrate"
+	"ffmpeg.format" "code" "ref.label"
+	"child" "engine" "opts.label" "purl"
+	"R.options")
   )
 
 (defun erasciible--grab-symbol ()
@@ -285,7 +285,7 @@ string.  This version is modified from company's to allow the
 period characters in symbols that are commonly used in R and
 knitr"
   (if (or (looking-at "\\_>")
-		  (looking-back "\\."))
+	  (looking-back "\\."))
       (buffer-substring (point) (save-excursion (skip-syntax-backward "w_.")
                                                 (point)))
     (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_ ?.)))
@@ -297,72 +297,72 @@ Completes knitr block names and arguments.  For documentation on
 COMMAND, ARG, and IGNORED see function `company-mode'."
   (interactive (list 'interactive))
   (cl-case command
-	(interactive (company-begin-backend 'erasciible-company-rasciidoc-backend))
-	(prefix (and (eq major-mode 'adoc-mode)
-				 (let ((curline (company-grab-line "^//.*")))
-				   (if curline
-					   (cond ((string= curline "//")
-							  curline)
-							 ;; Undefined block name
-							 ((string-match "//begin.rcode\s+$" curline)
-							  "")
-							 ;; Partial block name
-							 ((string-match "//begin.rcode\s[[:graph:]]+" curline)
-							  (erasciible--grab-symbol))
-							 )))))
-	(candidates
-	 (message (concat "Arg is " arg))
-	 (cond ((string= arg "//")
-			(list "//begin.rcode" "//end.rcode"))
+    (interactive (company-begin-backend 'erasciible-company-rasciidoc-backend))
+    (prefix (and (eq major-mode 'adoc-mode)
+		 (let ((curline (company-grab-line "^//.*")))
+		   (if curline
+		       (cond ((string= curline "//")
+			      curline)
+			     ;; Undefined block name
+			     ((string-match "//begin.rcode\s+$" curline)
+			      "")
+			     ;; Partial block name
+			     ((string-match "//begin.rcode\s[[:graph:]]+" curline)
+			      (erasciible--grab-symbol))
+			     )))))
+    (candidates
+     (message (concat "Arg is " arg))
+     (cond ((string= arg "//")
+	    (list "//begin.rcode" "//end.rcode"))
 
-		   ;; TODO: Add support for block arguments
-		   ((string= arg "")
-			(let ((nwords (length (split-string (company-grab-line "^//.*")))))
- 			  (cond ((eq nwords 1)
-				     (erasciible-get-missing-knitr-blocks))
-					((> nwords 1)
-					 (erasciible-get-knitr-block-args))
-					((< nwords 1)
-					 (list "//begin.rcode" "//end.rcode")))))
+	   ;; TODO: Add support for block arguments
+	   ((string= arg "")
+	    (let ((nwords (length (split-string (company-grab-line "^//.*")))))
+ 	      (cond ((eq nwords 1)
+		     (erasciible-get-missing-knitr-blocks))
+		    ((> nwords 1)
+		     (erasciible-get-knitr-block-args))
+		    ((< nwords 1)
+		     (list "//begin.rcode" "//end.rcode")))))
 
-		   ;; Partially named blocks or arguments
-		   ((string-match "[[:graph:]]+" arg)
-			(let ((nwords (length (split-string (company-grab-line "^//.*")))))
-			  (cond ((eq nwords 1)
-					 (cl-remove-if-not
-					  (lambda (x) (string-prefix-p arg x))
-					  (erasciible-get-missing-knitr-blocks)))
-					((> nwords 1)
-					 (cl-remove-if-not
-					  (lambda (x) (string-prefix-p arg x))
-					  (erasciible-get-knitr-block-args)))
-					((< nwords 1)
-					 (list)))))
-		   ))))
+	   ;; Partially named blocks or arguments
+	   ((string-match "[[:graph:]]+" arg)
+	    (let ((nwords (length (split-string (company-grab-line "^//.*")))))
+	      (cond ((eq nwords 1)
+		     (cl-remove-if-not
+		      (lambda (x) (string-prefix-p arg x))
+		      (erasciible-get-missing-knitr-blocks)))
+		    ((> nwords 1)
+		     (cl-remove-if-not
+		      (lambda (x) (string-prefix-p arg x))
+		      (erasciible-get-knitr-block-args)))
+		    ((< nwords 1)
+		     (list)))))
+	   ))))
 
 ;;; Faces
 
 (defface erasciible-block-keyword-face
   '((default . (:inherit font-lock-warning-face :weight extra-bold
-						 :height (lambda (x) (round (* x 1.5))))))
+		:height (lambda (x) (round (* x 1.5))))))
   "Font Lock face used to highlight block keywords (like @knitr) in erasciible ess buffers."
   :group 'erasciible)
 
 (defface erasciible-block-id-face
   '((default . (:inherit font-lock-variable-name-face :weight extra-bold
-						 :height (lambda (x) (round (* x 1.5))))))
+		:height (lambda (x) (round (* x 1.5))))))
   "Font Lock face used to highlight block id names in ess erasciible buffers."
   :group 'erasciible)
 
 (defvar erasciible-mode-map
   (let ((map (make-sparse-keymap "eRASCIIble")))
-	 (define-key map (kbd "C-c g") 'erasciible-goto-knitr-block)
-	 (define-key map (kbd "C-c C-n") 'erasciible-new-analysis)
-	 (define-key map (kbd "C-x p") 'erasciible-goto-paired-knitr-block)
-	 (define-key map (kbd "C-c u") 'erasciible-copy-current-knitr-block-name)
-	 (define-key map (kbd "C-c C-x i") 'erasciible-insert-current-block-into-asciidoc)
-	 (define-key map (kbd "C-c b") 'erasciible-insert-knitr-block)
-	 map)
+    (define-key map (kbd "C-c g") 'erasciible-goto-knitr-block)
+    (define-key map (kbd "C-c C-n") 'erasciible-new-analysis)
+    (define-key map (kbd "C-x p") 'erasciible-goto-paired-knitr-block)
+    (define-key map (kbd "C-c u") 'erasciible-copy-current-knitr-block-name)
+    (define-key map (kbd "C-c C-x i") 'erasciible-insert-current-block-into-asciidoc)
+    (define-key map (kbd "C-c b") 'erasciible-insert-knitr-block)
+    map)
   "Keymap used by `erasciible-mode'.")
 
 ;;; Define the Mode
@@ -378,18 +378,18 @@ reproducible document generation.
   (font-lock-add-keywords
    nil
    '(("#.*[[:space:]]+\\(@knitr\\)"
-	  1
-	  'erasciible-block-keyword-face
-	  prepend)
-	 ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)"
-	  2
-	  'erasciible-block-id-face
-	  prepend)))
+      1
+      'erasciible-block-keyword-face
+      prepend)
+     ("#.*[[:space:]]+\\(@knitr\\)[[:space:]]+\\([[:graph:]]+\\)"
+      2
+      'erasciible-block-id-face
+      prepend)))
   (if (fboundp 'font-lock-flush)
-	  (font-lock-flush)
-	(when font-lock-mode
-	  (with-no-warnings
-		(font-lock-fontify-buffer))))
+      (font-lock-flush)
+    (when font-lock-mode
+      (with-no-warnings
+	(font-lock-fontify-buffer))))
   (add-to-list 'company-backends 'erasciible-company-rasciidoc-backend))
 
 ;;; Additional Configuration
