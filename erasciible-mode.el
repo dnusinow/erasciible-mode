@@ -87,16 +87,11 @@ and open the buffers in the background"
 	 (paired-frame (window-frame paired-win)))
     (raise-frame paired-frame)
     (if paired-win
-	(select-window paired-win)
-      (switch-to-buffer paired-buf))
-    (let* ((blocks (erasciible-get-knitr-blocks))
-	   (block-names (mapcar 'car blocks)))
-      (goto-char (car (delq nil
-			    (mapcar (lambda (x)
-				      (if (string= block (car x))
-					  (cadr x)
-					nil))
-				    blocks)))))))
+	(select-window paired-win))
+    (switch-to-buffer paired-buf)
+  (goto-char (nth 1
+                  (--first (equal (-first-item it) block)
+                           (erasciible-get-knitr-blocks))))))
 
 (defun erasciible-append-missing-knitr-blocks ()
   "Append knitr blocks for all missing blocks to the current buffer.
