@@ -285,7 +285,7 @@ string.  This version is modified from company's to allow the
 period characters in symbols that are commonly used in R and
 knitr"
   (if (or (looking-at "\\_>")
-	  (looking-back "\\."))
+	  (looking-back "\\." nil))
       (buffer-substring (point) (save-excursion (skip-syntax-backward "w_.")
                                                 (point)))
     (unless (and (char-after) (memq (char-syntax (char-after)) '(?w ?_ ?.)))
