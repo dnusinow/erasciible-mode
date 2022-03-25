@@ -49,26 +49,26 @@ and open the buffers in the background"
   "Insert a reference to the current block in to the asciidoc file at the point in that buffer."
   (interactive)
   (with-current-buffer (erasciible-r-buffer)
-    (let ((block (erasciible-get-current-knitr-block-name)))
+    (let ((block (erasciible-current-knitr-block-name)))
       (with-current-buffer (erasciible-rasciidoc-buffer)
         (erasciible-insert-knitr-block block)))))
 
 (defun erasciible-copy-current-knitr-block-name ()
   "Copy the current knitr block name to the kill ring."
   (interactive)
-  (let ((block (erasciible-get-current-knitr-block-name)))
+  (let ((block (erasciible-current-knitr-block-name)))
     (kill-new block)))
 
 (defun erasciible-kill-block ()
   "Kill the current block."
   (interactive)
-  (let ((pos (erasciible-get-block-pos)))
+  (let ((pos (erasciible-block-pos)))
     (kill-region (car pos) (cdr pos))))
 
 (defun erasciible-goto-knitr-block ()
   "Go to a specified knitr block."
   (interactive)
-  (let* ((blocks (erasciible-get-knitr-blocks))
+  (let* ((blocks (erasciible-knitr-blocks))
 	 (block-names (mapcar 'car blocks))
 	 (selblock (ido-completing-read "Select a block: " block-names)))
     (goto-char (car (delq nil
@@ -81,8 +81,8 @@ and open the buffers in the background"
 (defun erasciible-goto-paired-knitr-block ()
   "Go to the current knitr block in the paired file."
   (interactive)
-  (let* ((block (erasciible-get-current-knitr-block-name))
-	 (paired-buf (erasciible-get-paired-knitr-buffer))
+  (let* ((block (erasciible-current-knitr-block-name))
+	 (paired-buf (erasciible-paired-knitr-buffer))
 	 (paired-win (get-buffer-window paired-buf t))
 	 (paired-frame (window-frame paired-win)))
     (raise-frame paired-frame)
@@ -91,7 +91,7 @@ and open the buffers in the background"
     (switch-to-buffer paired-buf)
   (goto-char (nth 1
                   (--first (equal (-first-item it) block)
-                           (erasciible-get-knitr-blocks))))))
+                           (erasciible-knitr-blocks))))))
 
 (defun erasciible-append-missing-knitr-blocks ()
   "Append knitr blocks for all missing blocks to the current buffer.
@@ -101,7 +101,7 @@ and moved around if they are missing."
   (goto-char (point-max))
   (insert (concat "\n" comment-start "MISSING KNITR BLOCKS\n"))
   (save-excursion
-    (mapc 'erasciible-insert-knitr-block (erasciible-get-missing-knitr-blocks))))
+    (mapc 'erasciible-insert-knitr-block (erasciible-missing-knitr-blocks))))
 
 (defun erasciible-move-block-to-archive ()
   "Take the whole current knitr block and move it to an archived file.
@@ -145,33 +145,33 @@ in the Rasciidoc that matches the first R file block."
   (cond ((string-match "\\.R$" (buffer-name))
          (buffer-name))
         ((string-match "\\.Rasciidoc$" (buffer-name))
-         (erasciible-get-paired-knitr-buffer))))
+         (erasciible-paired-knitr-buffer))))
 
 (defun erasciible-rasciidoc-buffer ()
   "Gets the name of the Rasciidoc buffer for the current paired set of files."
   (cond ((string-match "\\.Rasciidoc$" (buffer-name))
          (buffer-name))
         ((string-match "\\.R$" (buffer-name))
-         (erasciible-get-paired-knitr-buffer))))
+         (erasciible-paired-knitr-buffer))))
 
 (defun erasciible-r-blocks ()
   "Gets all the knitr blocks in the R file."
   (with-current-buffer (erasciible-r-buffer)
-    (erasciible-get-knitr-blocks)))
+    (erasciible-knitr-blocks)))
 
 (defun erasciible-rasciidoc-blocks ()
   "Gets all the knitr blocks in the Rasciidoc file."
   (with-current-buffer (erasciible-rasciidoc-buffer)
-    (erasciible-get-knitr-blocks)))
+    (erasciible-knitr-blocks)))
 
-(defun erasciible-get-current-knitr-block-name ()
+(defun erasciible-current-knitr-block-name ()
   "Get the current knitr block name."
   (save-excursion
     (save-match-data
-      (if (re-search-backward (erasciible-get-knitr-block-rx))
+      (if (re-search-backward (erasciible-knitr-block-rx))
 	  (match-string 1)))))
 
-(defun erasciible-get-knitr-block-rx ()
+(defun erasciible-knitr-block-rx ()
   "Get a regex for a knitr block name.
 Depends on the type of file the current buffer is."
   (cond ((string-match "\\.Rasciidoc$" (buffer-name))
@@ -200,7 +200,7 @@ The first item in the list is a regex to match the beginning of a
 		 "//begin.rcode"
 		 "//end.rcode")))))
 
-(defun erasciible-get-knitr-blocks ()
+(defun erasciible-knitr-blocks ()
   "Get a list of knitr blocks in the .R or Rasciidoc file.
 Returned as a list of two element lists.  The first element is the
   name of the block, the second is the position in the file"
@@ -208,27 +208,27 @@ Returned as a list of two element lists.  The first element is the
     (save-match-data
       (goto-char (point-min))
       (let ((blocks ()))
-	(while (re-search-forward (erasciible-get-knitr-block-rx) nil t)
+	(while (re-search-forward (erasciible-knitr-block-rx) nil t)
 	  (let ((matched (match-string 1)))
 	    (set-text-properties 0 (string-width matched) nil matched)
 	    (push (list matched (point)) blocks)))
 	(nreverse blocks)))))
 
-(defun erasciible-get-missing-knitr-blocks ()
+(defun erasciible-missing-knitr-blocks ()
   "Return a list of block names in the paired knitr file that aren't present in the current buffer."
-  (let* ((paired-buf (erasciible-get-paired-knitr-buffer))
-	 (these-blocks (mapcar 'car (erasciible-get-knitr-blocks)))
+  (let* ((paired-buf (erasciible-paired-knitr-buffer))
+	 (these-blocks (mapcar 'car (erasciible-knitr-blocks)))
 	 (paired-blocks
 	  (save-excursion
 	    (set-buffer paired-buf)
-	    (mapcar 'car (erasciible-get-knitr-blocks)))))
+	    (mapcar 'car (erasciible-knitr-blocks)))))
     (nreverse (cl-set-difference paired-blocks these-blocks :test 'string=))))
 
-(defun erasciible-get-block-pos ()
+(defun erasciible-block-pos ()
   "Select the whole of a block including preceding comments.
 TODO: Take named block defaulting to the current one."
   (save-excursion
-    (let ((rx (erasciible-get-knitr-block-rx))
+    (let ((rx (erasciible-knitr-block-rx))
 	  (start (point)))
       (message rx)
       (if (not (re-search-backward rx 0 t))
@@ -240,7 +240,7 @@ TODO: Take named block defaulting to the current one."
 		       (match-beginning 0))))
 	    (cons beg end)))))))
 
-(defun erasciible-get-paired-knitr-buffer ()
+(defun erasciible-paired-knitr-buffer ()
   "Gets the matching knitr buffer for the current one.
 If it's an R buffer it'll be an Rasciidoc and vice-versa."
   (save-match-data
@@ -251,7 +251,7 @@ If it's an R buffer it'll be an Rasciidoc and vice-versa."
 
 ;;; Completion Functions
 
-(defun erasciible-get-knitr-block-args
+(defun erasciible-knitr-block-args
     ()
   "Arguments to knitr for block evaluation."
   (list "eval" "echo" "results" "collapse" "warning" "error"
@@ -314,9 +314,9 @@ COMMAND, ARG, and IGNORED see function `company-mode'."
 	   ((string= arg "")
 	    (let ((nwords (length (split-string (company-grab-line "^//.*")))))
  	      (cond ((eq nwords 1)
-		     (erasciible-get-missing-knitr-blocks))
+		     (erasciible-missing-knitr-blocks))
 		    ((> nwords 1)
-		     (erasciible-get-knitr-block-args))
+		     (erasciible-knitr-block-args))
 		    ((< nwords 1)
 		     (list "//begin.rcode" "//end.rcode")))))
 
@@ -326,11 +326,11 @@ COMMAND, ARG, and IGNORED see function `company-mode'."
 	      (cond ((eq nwords 1)
 		     (cl-remove-if-not
 		      (lambda (x) (string-prefix-p arg x))
-		      (erasciible-get-missing-knitr-blocks)))
+		      (erasciible-missing-knitr-blocks)))
 		    ((> nwords 1)
 		     (cl-remove-if-not
 		      (lambda (x) (string-prefix-p arg x))
-		      (erasciible-get-knitr-block-args)))
+		      (erasciible-knitr-block-args)))
 		    ((< nwords 1)
 		     (list)))))
 	   ))))
