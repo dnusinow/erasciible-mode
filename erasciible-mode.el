@@ -42,7 +42,7 @@ and open the buffers in the background"
 	    (move-end-of-line 1)
 	    (newline-and-indent)))
       (insert (concat begstr " " mod-block-name "\n" endstr "\n"))
-      (previous-line 2)
+      (forward-line -2)
       (move-end-of-line 1))))
 
 (defun erasciible-insert-current-block-into-asciidoc ()
